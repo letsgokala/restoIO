@@ -1,0 +1,5 @@
+import type { AuthResponseDto } from '../dtos/auth-response.dto.js';
+import type { AuthenticatedUser } from '../types/auth.types.js';
+type UserRecord = { id: string; email: string; displayName: string; isPlatformAdmin: boolean; memberships: Array<{ restaurantId: string; role: AuthResponseDto['memberships'][number]['role']; restaurant: { name: string }; branchId: string | null; branch: { name: string } | null }> };
+export const toAuthResponse = (user: UserRecord): AuthResponseDto => ({ user: { id: user.id, email: user.email, displayName: user.displayName, isPlatformAdmin: user.isPlatformAdmin }, memberships: user.memberships.map((m) => ({ restaurantId: m.restaurantId, restaurantName: m.restaurant.name, branchId: m.branchId, branchName: m.branch?.name ?? null, role: m.role })) });
+export const toAuthenticatedUser = (user: { id: string; email: string; displayName: string; isPlatformAdmin: boolean }): AuthenticatedUser => ({ id: user.id, email: user.email, displayName: user.displayName, isPlatformAdmin: user.isPlatformAdmin });

@@ -1,0 +1,14 @@
+import { Router } from 'express';
+import { rateLimit } from 'express-rate-limit';
+import { authenticate } from '../../../middleware/authenticate.js';
+import { validateBody } from '../../../shared/validation/validate.js';
+import { createRestaurantSchema } from '../../management/validators/management.validator.js';
+import { loginSchema } from '../validators/auth.validator.js';
+import { login, logout, me, registerRestaurant } from '../controllers/auth.controller.js';
+const loginLimiter = rateLimit({ windowMs: 900000, limit: 10, standardHeaders: 'draft-8', legacyHeaders: false });
+const registrationLimiter = rateLimit({ windowMs: 3600000, limit: 5, standardHeaders: 'draft-8', legacyHeaders: false });
+export const authRouter = Router();
+authRouter.post('/register-restaurant', registrationLimiter, validateBody(createRestaurantSchema), registerRestaurant);
+authRouter.post('/login', loginLimiter, validateBody(loginSchema), login);
+authRouter.get('/me', authenticate, me);
+authRouter.post('/logout', authenticate, logout);
