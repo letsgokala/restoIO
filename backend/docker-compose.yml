@@ -1,0 +1,20 @@
+name: restoio
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: restoio
+      POSTGRES_PASSWORD: restoio_dev
+      POSTGRES_DB: restoio
+    ports:
+      - "55432:5432"
+    volumes:
+      - restoio-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U restoio -d restoio"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  restoio-postgres:
