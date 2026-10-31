@@ -1,0 +1,10 @@
+import { apiRequest } from '../../lib/api/client';
+export type ManagedBranch = { id: string; name: string; slug: string; address: string | null; isActive: boolean; _count?: { tables: number; memberships: number } };
+export type ManagedRestaurant = { id: string; name: string; slug: string; currency: string; role: string; branchIds: string[] | null; branches: { id: string; name: string; isActive: boolean }[] };
+export type ManagedCategory = { id: string; name: string; sortOrder: number; isActive: boolean; translations: { locale: string; name: string }[]; items: ManagedItem[] };
+export type ManagedItem = { id: string; publicId: string; categoryId: string; name: string; description: string | null; ingredients: string | null; allergens: string | null; portionSize: string | null; price: string; imageUrl: string | null; dietaryLabels: string[]; spiceLevel: number | null; isFeatured: boolean; isActive: boolean; translations: { locale: string; name: string; description: string | null; ingredients: string | null; allergens: string | null; portionSize: string | null }[]; branchAvailability: { branchId: string; isAvailable: boolean; branch: { id: string; name: string } }[]; modifierGroups: ManagedModifierGroup[] };
+export type ManagedModifierGroup = { id: string; name: string; isRequired: boolean; minSelections: number; maxSelections: number; translations: { locale: string; name: string }[]; options: { id: string; name: string; priceDelta: string; isAvailable: boolean; translations: { locale: string; name: string }[] }[] };
+export type TenantApi = <T>(path: string, init?: RequestInit) => Promise<T>;
+export const getAccessibleRestaurants = () => apiRequest<{ restaurants: ManagedRestaurant[] }>('/management/restaurants');
+export const createRestaurantAsPlatformAdmin = (body: unknown) => apiRequest('/platform/restaurants', { method: 'POST', body: JSON.stringify(body) });
+export const createRestaurantAsOwner = (body: unknown) => apiRequest('/management/restaurants', { method: 'POST', body: JSON.stringify(body) });
