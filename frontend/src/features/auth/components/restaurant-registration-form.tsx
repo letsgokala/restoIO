@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { z } from 'zod';
 import { ApiClientError } from '@/lib/api/client';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '../hooks/use-auth';
 import { registerRestaurant } from '../services/auth.service';
 
 const schema = z.object({
@@ -21,8 +20,8 @@ type Values = z.infer<typeof schema>;
 const slugify = (value: string) => value.toLowerCase().trim().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
 
 export function RestaurantRegistrationForm() {
-  const auth = useAuth();
   const [error, setError] = useState('');
+  const [submitted, setSubmitted] = useState(false);
   const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: { restaurantName: '', slug: '', ownerName: '', ownerEmail: '', password: '', branchName: 'Main Branch' },
@@ -32,13 +31,13 @@ export function RestaurantRegistrationForm() {
     const branchSlug = slugify(values.branchName) || 'main-branch';
     try {
       await registerRestaurant({ name: values.restaurantName, slug: values.slug, ownerName: values.ownerName, ownerEmail: values.ownerEmail, password: values.password, branchName: values.branchName, branchSlug, currency: 'ETB', timezone: 'Africa/Addis_Ababa' });
-      const result = await auth.signIn(values.ownerEmail, values.password);
-      if (result) window.location.assign('/manage');
-      else setError('Your restaurant is ready, but automatic sign-in failed. Please sign in with the email and password you created.');
+      setSubmitted(true);
     } catch (cause) {
       setError(cause instanceof ApiClientError ? cause.message : 'We could not create the restaurant account. Please try again.');
     }
   });
+
+  if (submitted) return <section className="register-confirmation" role="status"><h2>Request submitted</h2><p>Your restaurant account is waiting for platform review. After it is approved, sign in with the email and password you created.</p><Link href="/login">Go to sign in</Link></section>;
 
   return <form onSubmit={submit} className="login-form register-form">
     <label className="form-label" htmlFor="restaurant-name">Restaurant name
@@ -67,7 +66,7 @@ export function RestaurantRegistrationForm() {
       {errors.branchName && <span className="form-error">{errors.branchName.message}</span>}
     </label>
     {error && <p role="alert" className="form-error">{error}</p>}
-    <Button className="button--full" disabled={isSubmitting || auth.loading}>{isSubmitting || auth.loading ? 'Creating workspace…' : 'Create restaurant account'}<span aria-hidden="true">→</span></Button>
+    <Button className="button--full" disabled={isSubmitting}>{isSubmitting ? 'Submitting request…' : 'Request restaurant account'}<span aria-hidden="true">→</span></Button>
     <p className="login-footnote">Already have an account? <Link href="/login">Sign in</Link></p>
   </form>;
 }

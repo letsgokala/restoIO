@@ -74,11 +74,11 @@ Platform administrators land at `/platform` to view and suspend/reactivate resta
 
 ### Production onboarding without demo seed data
 
-Production restaurants do not depend on `npm run db:seed`. Apply the Prisma migrations, deploy the API and web app, then visit `/register` to create a real restaurant owner account, the restaurant workspace, and its first branch. The owner is signed in and sent to `/manage`, where they can add branches, staff, menu categories and dishes, tables, and QR codes. Empty workspaces show setup guidance, and a customer QR menu with no published dishes explains that the restaurant has not published its menu yet. `db:seed` is for local development only and refuses to run in production.
+Production restaurants do not depend on `npm run db:seed`. The API applies pending Prisma migrations before it starts. Create the first platform administrator by setting a random `PLATFORM_ADMIN_BOOTSTRAP_TOKEN` (at least 32 characters) in the backend host, deploying, then visiting `/platform/bootstrap` and submitting that token with the administrator's details. This one-time endpoint refuses to create another administrator after the first exists. Remove the bootstrap token from the backend environment afterward. Sign in at `/login`; platform administrators are sent to `/platform` and can review cafe signup requests or create accounts from `/manage`.
 
-Public registration is limited to five attempts per IP per hour and requires a 12-character password. Email verification and bot protection are not configured yet; add those controls before broadly advertising public signup.
+Public registration is limited to five attempts per IP per hour and requires a 12-character password. Signup creates a `PENDING` restaurant and owner; the owner cannot sign in until a platform administrator approves it in `/platform`. The administrator must notify the owner outside the app because email verification and outbound email are not configured. Bot protection and password reset are also not configured; consider those before broadly advertising registration.
 
-For internet access, the supported Vercel + AletCloud setup keeps browser API calls same-origin: set the Vercel project root to `frontend/`, configure `NEXT_PUBLIC_API_URL=/api/v1`, and set `BACKEND_ORIGIN` to the AletCloud API's HTTPS origin. The frontend rewrite proxies `/api/v1/*` to AletCloud, allowing strict session cookies to work without cross-site browser cookies. Set the backend `WEB_ORIGIN` to the exact Vercel production origin and set `DATABASE_URL` to the AletCloud PostgreSQL connection string. Set `NODE_ENV=production` and a unique `QR_TOKEN_ENCRYPTION_KEY` of at least 32 bytes. Keep the database private and reachable from the API app through AletCloud's app/database connection. Run `npm run db:deploy` from `backend/` after configuring the production database and before creating restaurant accounts; do not run the seed command in production. Configure QR links to use the Vercel frontend origin so printed codes work outside your office or restaurant Wi-Fi. Customers can scan over mobile data or any Wi-Fi with internet access; they do not need to join the server's private network.
+For internet access, the supported Vercel + AletCloud setup keeps browser API calls same-origin: set the Vercel project root to `frontend/`, configure `NEXT_PUBLIC_API_URL=/api/v1`, and set `BACKEND_ORIGIN` to the AletCloud API's HTTPS origin. The frontend rewrite proxies `/api/v1/*` to AletCloud, allowing strict session cookies to work without cross-site browser cookies. Set the backend `WEB_ORIGIN` to the exact Vercel production origin and link the AletCloud PostgreSQL database to the API app so `DATABASE_URL` is injected. Set `NODE_ENV=production` and a unique `QR_TOKEN_ENCRYPTION_KEY` of at least 32 bytes. The API start command runs `prisma migrate deploy` before listening; keep the database private. Do not run the seed command in production. Configure QR links to use the Vercel frontend origin so printed codes work outside your office or restaurant Wi-Fi. Customers can scan over mobile data or any Wi-Fi with internet access; they do not need to join the server's private network.
 
 Chapa and Telebirr provider interfaces are scaffolded but online checkout is disabled pending merchant credentials and tested provider adapters. Managed image storage is not configured; use HTTPS image URLs. See [`docs/MANUAL_TESTING_GUIDE.md`](docs/MANUAL_TESTING_GUIDE.md) for the full walkthrough and deployment/backup steps.
 
@@ -98,7 +98,7 @@ npm run typecheck
 npm run build
 ```
 
-`npm run build`, `npm run typecheck`, and `npm test` generate the Prisma client automatically. The production build also copies it into `dist/`; run the API with `npm start` after the build. Managed hosts should run `npm run db:deploy` as their pre-deploy migration command, and must build with the Prisma CLI available.
+`npm run build`, `npm run typecheck`, and `npm test` generate the Prisma client automatically. The production build also copies it into `dist/`; `npm start` applies pending migrations and then starts the API. Managed hosts must install production dependencies including the Prisma CLI.
 
 Run frontend commands from `frontend/`:
 
@@ -118,7 +118,8 @@ For disposable local data only, `docker compose down -v` removes the database vo
 
 - `GET /api/v1/health`: API readiness response; `/health` redirects here.
 - `POST /api/v1/auth/login`: validates credentials and sets an HTTP-only session cookie.
-- `POST /api/v1/auth/register-restaurant`: rate-limited public onboarding that creates a restaurant owner account, first restaurant, and first branch atomically; it does not create demo data.
+- `POST /api/v1/auth/register-restaurant`: rate-limited public signup request that creates a pending restaurant, owner, and first branch atomically.
+- `POST /api/v1/auth/bootstrap-platform-admin`: one-time token-protected creation of the first platform administrator; unavailable after an administrator exists.
 - `GET /api/v1/auth/me`: returns the signed-in staff profile.
 - `POST /api/v1/auth/logout`: revokes the session and clears its cookie.
 - `GET /api/v1/tenant/context`: requires a session and `X-Restaurant-Id`, with optional `X-Branch-Id`.
@@ -153,7 +154,7 @@ For disposable local data only, `docker compose down -v` removes the database vo
 - `GET /api/v1/tenant/analytics?from=<ISO>&to=<ISO>&branchId=<id>`: owner/manager date-range and permitted-branch reports.
 - `GET /api/v1/platform/restaurants` and `PATCH /api/v1/platform/restaurants/:restaurantId/status`: platform-admin restaurant account list and activate/suspend.
 
-API routes are versioned under `/api/v1`; error responses include stable codes and request IDs.
+API routes are versioned under `/api/v1`; error responses include stable codes and request IDs. Frontend errors show the request ID so the corresponding backend log can be found.
 
 ## Project structure
 

@@ -14,7 +14,7 @@ export default function RegisterPage() {
         <div className="mobile-brand"><Brand/></div>
         <div className="eyebrow"><span className="eyebrow-mark" aria-hidden="true"/>RESTAURANT OWNER SETUP</div>
         <h1 className="display-type login-title">Create your account</h1>
-        <p className="login-subtitle">Your first branch is created with your workspace. You can add more branches, team members, tables, and menu items after signing in.</p>
+        <p className="login-subtitle">Submit your restaurant details for review. You can sign in and set up your menu, team, and tables after approval.</p>
         <RestaurantRegistrationForm/>
         <Link className="back-link" href="/">← Back to RestoIO</Link>
       </div>

@@ -2,7 +2,7 @@
 
 The Prisma schema contains the identity and tenant foundation, restaurant management, guest ordering, and kitchen preparation domains. All timestamps use PostgreSQL `timestamptz`; the display timezone is a restaurant setting.
 
-- `Restaurant`: tenant root, unique public slug, active/suspended state, description, branding/contact fields, ETB currency default, timezone.
+- `Restaurant`: tenant root, unique public slug, pending/active/suspended state, description, branding/contact fields, ETB currency default, timezone. Public signup creates pending records until platform approval.
 - `Branch`: belongs to a restaurant; branch slug is unique within the restaurant.
 - `User`: unique normalized email, Argon2id hash, active flag and explicit platform-admin flag.
 - `Membership`: user-to-restaurant role grant, optionally branch-scoped. Composite branch foreign key ensures the branch belongs to the same restaurant.

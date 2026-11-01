@@ -21,7 +21,7 @@ afterAll(async () => {
 });
 
 describe('restaurant owner onboarding without development seed data', () => {
-  it('creates the first owner, restaurant, and branch and opens an empty workspace', async () => {
+  it('creates a pending owner signup and only grants access after platform approval', async () => {
     const created = await request(app).post('/api/v1/auth/register-restaurant').send({
       name: 'Fresh Restaurant', slug: `fresh-restaurant-${suffix}`, currency: 'ETB', timezone: 'Africa/Addis_Ababa',
       branchName: 'Main Branch', branchSlug: 'main-branch', ownerName: 'First Owner', ownerEmail: email, password,
@@ -31,6 +31,9 @@ describe('restaurant owner onboarding without development seed data', () => {
     ownerId = owner.id;
     expect(created.body).toMatchObject({ restaurant: { name: 'Fresh Restaurant' }, branch: { name: 'Main Branch' }, owner: { email, displayName: 'First Owner' } });
     expect(owner.isPlatformAdmin).toBe(false);
+    expect((await prisma.restaurant.findUniqueOrThrow({ where: { id: restaurantId } })).status).toBe('PENDING');
+    await request(app).post('/api/v1/auth/login').send({ email, password }).expect(403).expect((response) => expect(response.body.error.code).toBe('ACCOUNT_PENDING_APPROVAL'));
+    await prisma.restaurant.update({ where: { id: restaurantId }, data: { status: 'ACTIVE' } });
 
     const signedIn = await request(app).post('/api/v1/auth/login').send({ email, password }).expect(200);
     const cookie = (signedIn.headers['set-cookie'] as unknown as string[])[0]!.split(';')[0]!;

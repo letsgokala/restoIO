@@ -19,6 +19,7 @@
   --shadow-soft: 0 24px 70px -42px rgba(32, 46, 36, .48);
   --ease-out: cubic-bezier(.2, .75, .25, 1);
 }
+.platform-status.pending { background: #fff5df; color: #8c6422; }
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }

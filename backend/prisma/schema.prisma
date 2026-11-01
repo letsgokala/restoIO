@@ -18,6 +18,7 @@ enum UserRole {
 }
 
 enum AccountStatus {
+  PENDING
   ACTIVE
   SUSPENDED
 }

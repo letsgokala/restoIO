@@ -6,7 +6,7 @@ RestoIO is a multi-tenant restaurant ordering and operations SaaS for Ethiopian 
 
 ## Phase 1 scope
 
-The foundation established the repository, tenant and staff identity model, secure staff sign-in, API conventions, local PostgreSQL environment, seed fixture and starter web pages. The `/manage` workspace now lets platform administrators onboard a restaurant and its owner, and restaurant owners manage their restaurant profile and settings.
+The foundation established the repository, tenant and staff identity model, secure staff sign-in, API conventions, local PostgreSQL environment, seed fixture and starter web pages. Platform administrators can provision restaurants; public cafe signup requests remain pending until a platform administrator approves them. The `/manage` workspace lets restaurant owners manage their restaurant profile and settings.
 
 ## Phase 2 restaurant management
 

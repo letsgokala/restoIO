@@ -5,8 +5,10 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
   if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
   const response = await fetch(`${apiBaseUrl}${path}`, { ...init, credentials: 'include', headers });
   if (!response.ok) {
-    const payload = await response.json().catch(() => null) as { error?: { message?: string } } | null;
-    throw new ApiClientError(payload?.error?.message ?? 'The request failed', response.status);
+    const payload = await response.json().catch(() => null) as { error?: { message?: string; requestId?: string } } | null;
+    const message = payload?.error?.message ?? 'The request failed';
+    const requestId = payload?.error?.requestId ?? response.headers.get('X-Request-Id') ?? undefined;
+    throw new ApiClientError(requestId ? `${message} (Reference: ${requestId})` : message, response.status);
   }
   if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;

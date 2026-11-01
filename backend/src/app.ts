@@ -19,6 +19,7 @@ import { cashierRouter } from './modules/cashier/cashier.routes.js';
 import { analyticsRouter } from './modules/analytics/analytics.routes.js';
 export const app = express();
 app.disable('x-powered-by');
+app.set('trust proxy', 1);
 app.use(helmet());
 app.use(cors({ origin: env.WEB_ORIGIN, credentials: true, methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'], allowedHeaders: ['Content-Type', 'X-Restaurant-Id', 'X-Branch-Id', 'Idempotency-Key', 'X-Guest-Order-Token'] }));
 app.use(express.json({ limit: '1mb' }));

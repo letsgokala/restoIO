@@ -12,6 +12,7 @@ const envSchema = z.object({
   SESSION_COOKIE_NAME: z.string().min(1).default('restoio_session'),
   SESSION_TTL_HOURS: z.coerce.number().int().positive().max(720).default(12),
   QR_TOKEN_ENCRYPTION_KEY: z.string().min(32).default('restoio-local-qr-encryption-key-32'),
+  PLATFORM_ADMIN_BOOTSTRAP_TOKEN: z.string().min(32).optional(),
   SEED_ADMIN_EMAIL: z.string().email().default('admin@demo.local'),
   SEED_ADMIN_PASSWORD: z.string().min(12).default('ChangeMe_OnlyForLocalDev_123!'),
 });

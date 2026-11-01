@@ -295,10 +295,11 @@ Set backend environment variables on the server only:
 - `WEB_ORIGIN=https://your-web-domain` (exact origin, no path).
 - `SESSION_COOKIE_NAME` and `SESSION_TTL_HOURS` as required by session policy.
 - `QR_TOKEN_ENCRYPTION_KEY` as a stable secret of at least 32 bytes.
+- `PLATFORM_ADMIN_BOOTSTRAP_TOKEN` as a random secret of at least 32 characters during initial setup only; remove it after creating the first platform administrator.
 
-Set frontend `NEXT_PUBLIC_API_URL=https://your-api-domain/api/v1` at build time. It contains only the public API base URL. Chapa and Telebirr credentials are not implemented/configured and must not be added to frontend environment variables.
+For Vercel + AletCloud, set frontend `NEXT_PUBLIC_API_URL=/api/v1` and `BACKEND_ORIGIN=https://your-api-origin` at build time. The Next.js rewrite proxies API requests while keeping staff cookies same-origin. Keep database and QR encryption secrets on the backend only. Chapa and Telebirr credentials are not implemented/configured and must not be added to frontend environment variables.
 
-After deploying the public frontend and API, a restaurant owner can create an account at `/register`. This creates the owner, restaurant, and first branch without fixture data or a platform administrator. The owner then creates tables, menu content, and staff from `/manage`. Do not run `npm run db:seed` in production. The endpoint is IP-rate-limited, but this build does not verify email ownership or include bot protection; consider those launch requirements before publicly advertising registration.
+After deploying the public frontend and API, the first platform administrator bootstraps once at `/platform/bootstrap` using the backend's `PLATFORM_ADMIN_BOOTSTRAP_TOKEN`. Remove that token from the backend environment after setup. A cafe can then submit a signup request at `/register`; it remains pending until the platform administrator approves it at `/platform`. The owner can sign in after approval and create tables, menu content, and staff from `/manage`. Do not run `npm run db:seed` in production. Registration is IP-rate-limited, but email verification, approval email, and bot protection are not configured.
 
 Customers do not need the server's private network. Anyone with internet access can scan a QR code over cellular data or Wi-Fi after DNS and HTTPS are configured. The QR must point to the public frontend URL; the frontend must call the public API URL; only the API should connect to PostgreSQL. Do not expose the database port to the internet.
 
@@ -306,12 +307,13 @@ Deployment outline:
 
 1. Provision PostgreSQL and create a least-privilege application database user.
 2. Configure secrets and exact frontend origin in backend hosting settings; configure the API URL in frontend build settings.
-3. Build the backend with `npm ci` and `npm run build`. The build generates and packages the Prisma client into `dist/`. Run `npm run db:deploy` as the host's pre-deploy migration command.
+3. Build the backend with `npm ci` and `npm run build`. The build generates and packages the Prisma client into `dist/`. The production start command runs `npm run db:deploy` before starting the API.
 4. Run the backend with `npm start`; it binds to `0.0.0.0` and uses the platform's `PORT` value.
 5. Build and run the frontend with `npm run build` and `npm start`.
 6. Configure DNS, HTTPS certificates, health checks at `/api/v1/health`, and secure inbound network rules. The API sets staff cookies as `Secure` in production.
-7. Register a restaurant owner at `/register` and verify that the new workspace starts empty and displays setup guidance; do not run the development seed against production.
-8. Test account creation, login, tenant isolation, guest checkout, migration state, backups, and restore on staging before opening a pilot. If platform-wide account moderation is required, provision a platform administrator through a separate controlled operator process.
+7. Bootstrap the first platform administrator through `/platform/bootstrap` using the backend's one-time token, then remove the token from backend environment settings.
+8. Submit a restaurant application at `/register`; verify it appears as `PENDING` at `/platform` and its owner cannot sign in yet. Approve it, then verify the owner can sign in and set up tables, menu, and staff. Do not run the development seed against production.
+9. Test account creation, approval, login, tenant isolation, guest checkout, automatic migrations, backups, and restore on staging before opening a pilot.
 
 Before changing a production schema, take a database snapshot and run the exact migration on staging. Rollback procedure: stop writes, restore the pre-deployment database backup to a new/known-good database, redeploy the previous application build, point the application to the restored database, verify health and sample records, then reopen traffic. Prisma migrations are forward-only here; do not delete rows or edit `_prisma_migrations` to force a rollback.
 

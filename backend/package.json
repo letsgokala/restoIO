@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "npm run db:generate && tsc -p tsconfig.json && node scripts/copy-prisma-client.mjs",
-    "start": "node dist/src/server.js",
+    "start": "npm run db:deploy && node dist/src/server.js",
     "typecheck": "npm run db:generate && tsc --noEmit -p tsconfig.json",
     "test": "npm run db:generate && vitest run",
     "db:generate": "prisma generate --schema prisma/schema.prisma",
@@ -23,6 +23,7 @@
     "express": "^5.1.0",
     "express-rate-limit": "^8.1.0",
     "helmet": "^8.1.0",
+    "prisma": "^6.19.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
@@ -31,11 +32,10 @@
     "@types/express": "^5.0.3",
     "@types/node": "^22.15.30",
     "@types/supertest": "^6.0.3",
-    "prisma": "6.19.0",
+    "dotenv-cli": "^10.0.0",
     "supertest": "^7.1.4",
     "tsx": "^4.20.5",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4",
-    "dotenv-cli": "^10.0.0"
+    "vitest": "^3.2.4"
   }
 }

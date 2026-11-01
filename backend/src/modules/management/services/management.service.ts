@@ -26,7 +26,7 @@ export class ManagementService {
   async listPlatformRestaurants() {
     return (await managementRepository.platformRestaurants()).map(({ memberships, ...restaurant }) => ({ ...restaurant, currency: restaurant.currency.trim(), owner: memberships[0]?.user ?? null, branchCount: restaurant.branches.length, activeBranchCount: restaurant.branches.filter((branch) => branch.isActive).length, usage: { orders: restaurant._count.orders, sessions: restaurant._count.tableSessions } }));
   }
-  async setPlatformRestaurantStatus(id: string, status: 'ACTIVE' | 'SUSPENDED') {
+  async setPlatformRestaurantStatus(id: string, status: 'PENDING' | 'ACTIVE' | 'SUSPENDED') {
     try { const result = await managementRepository.setRestaurantStatus(id, status); if (!result.count) throw new AppError(404, 'RESTAURANT_NOT_FOUND', 'Restaurant not found'); return { updated: true, status }; } catch (error) { return mapDbError(error); }
   }
   async listAccessibleRestaurants(userId: string, platformAdmin: boolean) {
@@ -44,6 +44,9 @@ export class ManagementService {
   }
   async createRestaurant(input: { name: string; slug: string; description?: string; logoUrl?: string; coverImageUrl?: string; contactPhone?: string; websiteUrl?: string; currency: string; timezone: string; branchName: string; branchSlug: string; branchAddress?: string; ownerEmail: string; ownerName: string; password: string }) {
     try { return await managementRepository.createRestaurantWithOwner({ ...input, ownerEmail: input.ownerEmail.toLowerCase(), passwordHash: await argon2.hash(input.password, { type: argon2.argon2id }) }); } catch (error) { return mapDbError(error); }
+  }
+  async requestRestaurant(input: { name: string; slug: string; description?: string; logoUrl?: string; coverImageUrl?: string; contactPhone?: string; websiteUrl?: string; currency: string; timezone: string; branchName: string; branchSlug: string; branchAddress?: string; ownerEmail: string; ownerName: string; password: string }) {
+    try { return await managementRepository.createRestaurantWithOwner({ ...input, status: 'PENDING', ownerEmail: input.ownerEmail.toLowerCase(), passwordHash: await argon2.hash(input.password, { type: argon2.argon2id }) }); } catch (error) { return mapDbError(error); }
   }
   async createOwnedRestaurant(userId: string, input: { name: string; slug: string; description?: string; logoUrl?: string; coverImageUrl?: string; contactPhone?: string; websiteUrl?: string; currency: string; timezone: string; branchName: string; branchSlug: string; branchAddress?: string }) { try { return await managementRepository.createRestaurantForOwner(userId, input); } catch (error) { return mapDbError(error); } }
   getRestaurant(restaurantId: string) { return managementRepository.getRestaurant(restaurantId).then((r) => { if (!r) throw new AppError(404, 'RESTAURANT_NOT_FOUND', 'Restaurant not found'); return r; }); }

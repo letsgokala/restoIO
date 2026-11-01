@@ -7,7 +7,7 @@ export class ManagementRepository {
   platformRestaurants() {
     return prisma.restaurant.findMany({ orderBy: { createdAt: 'desc' }, select: { id: true, name: true, slug: true, status: true, currency: true, timezone: true, createdAt: true, branches: { select: { id: true, name: true, isActive: true } }, memberships: { where: { role: 'RESTAURANT_OWNER', isActive: true, branchId: null }, select: { user: { select: { email: true, displayName: true } } }, take: 1 }, _count: { select: { orders: true, tableSessions: true } } } });
   }
-  setRestaurantStatus(id: string, status: 'ACTIVE' | 'SUSPENDED') { return prisma.restaurant.updateMany({ where: { id }, data: { status } }); }
+  setRestaurantStatus(id: string, status: 'PENDING' | 'ACTIVE' | 'SUSPENDED') { return prisma.restaurant.updateMany({ where: { id }, data: { status } }); }
   accessibleRestaurants(userId: string, platformAdmin: boolean) {
     if (platformAdmin) return prisma.restaurant.findMany({ orderBy: { name: 'asc' }, include: { branches: { orderBy: { name: 'asc' }, select: { id: true, name: true, isActive: true } } } });
     return prisma.membership.findMany({ where: { userId, isActive: true, restaurant: { status: 'ACTIVE' }, OR: [{ branchId: null }, { branch: { is: { isActive: true } } }] }, include: { restaurant: { include: { branches: { orderBy: { name: 'asc' }, select: { id: true, name: true, isActive: true } } } }, branch: true }, orderBy: { createdAt: 'asc' } });
@@ -22,12 +22,12 @@ export class ManagementRepository {
       return { restaurant, branch };
     });
   }
-  createRestaurantWithOwner(input: { name: string; slug: string; description?: string; logoUrl?: string; coverImageUrl?: string; contactPhone?: string; websiteUrl?: string; currency: string; timezone: string; branchName: string; branchSlug: string; branchAddress?: string; ownerEmail: string; ownerName: string; passwordHash: string }) {
+  createRestaurantWithOwner(input: { name: string; slug: string; description?: string; logoUrl?: string; coverImageUrl?: string; contactPhone?: string; websiteUrl?: string; currency: string; timezone: string; branchName: string; branchSlug: string; branchAddress?: string; ownerEmail: string; ownerName: string; passwordHash: string; status?: 'PENDING' | 'ACTIVE' }) {
     return prisma.$transaction(async (tx) => {
       const existing = await tx.user.findUnique({ where: { email: input.ownerEmail } });
       if (existing?.isPlatformAdmin) throw new Error('OWNER_ACCOUNT_INVALID');
       if (existing) throw new Error('OWNER_ACCOUNT_EXISTS');
-      const restaurant = await tx.restaurant.create({ data: { name: input.name, slug: input.slug, description: input.description, logoUrl: input.logoUrl, coverImageUrl: input.coverImageUrl, contactPhone: input.contactPhone, websiteUrl: input.websiteUrl, currency: input.currency, timezone: input.timezone } });
+      const restaurant = await tx.restaurant.create({ data: { name: input.name, slug: input.slug, description: input.description, logoUrl: input.logoUrl, coverImageUrl: input.coverImageUrl, contactPhone: input.contactPhone, websiteUrl: input.websiteUrl, currency: input.currency, timezone: input.timezone, status: input.status ?? 'ACTIVE' } });
       const branch = await tx.branch.create({ data: { restaurantId: restaurant.id, name: input.branchName, slug: input.branchSlug, address: input.branchAddress } });
       const user = await tx.user.create({ data: { email: input.ownerEmail, displayName: input.ownerName, passwordHash: input.passwordHash } });
       await tx.membership.create({ data: { userId: user.id, restaurantId: restaurant.id, role: 'RESTAURANT_OWNER' } });
