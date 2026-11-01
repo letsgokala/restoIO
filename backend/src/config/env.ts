@@ -7,7 +7,7 @@ import { z } from 'zod';
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   DATABASE_URL: z.string().url().default('postgresql://restoio:restoio_dev@localhost:5432/restoio?schema=public'),
-  API_PORT: z.coerce.number().int().positive().default(4000),
+  API_PORT: z.coerce.number().int().positive().default(Number(process.env.PORT ?? 4000)),
   WEB_ORIGIN: z.string().url().default('http://localhost:3000'),
   SESSION_COOKIE_NAME: z.string().min(1).default('restoio_session'),
   SESSION_TTL_HOURS: z.coerce.number().int().positive().max(720).default(12),

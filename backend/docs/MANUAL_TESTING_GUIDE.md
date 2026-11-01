@@ -291,7 +291,7 @@ Set backend environment variables on the server only:
 
 - `NODE_ENV=production`
 - `DATABASE_URL` for the production PostgreSQL connection.
-- `API_PORT` as required by the host.
+- `PORT` is read automatically by the API on managed hosts; set `API_PORT` only if the host requires a different fixed port.
 - `WEB_ORIGIN=https://your-web-domain` (exact origin, no path).
 - `SESSION_COOKIE_NAME` and `SESSION_TTL_HOURS` as required by session policy.
 - `QR_TOKEN_ENCRYPTION_KEY` as a stable secret of at least 32 bytes.
@@ -306,8 +306,8 @@ Deployment outline:
 
 1. Provision PostgreSQL and create a least-privilege application database user.
 2. Configure secrets and exact frontend origin in backend hosting settings; configure the API URL in frontend build settings.
-3. Run `npm ci`, `npx prisma generate --schema prisma/schema.prisma`, and `npx prisma migrate deploy --schema prisma/schema.prisma` in the backend deployment job.
-4. Build and run the backend with `npm run build` and `npm start`.
+3. Build the backend with `npm ci` and `npm run build`. The build generates and packages the Prisma client into `dist/`. Run `npm run db:deploy` as the host's pre-deploy migration command.
+4. Run the backend with `npm start`; it binds to `0.0.0.0` and uses the platform's `PORT` value.
 5. Build and run the frontend with `npm run build` and `npm start`.
 6. Configure DNS, HTTPS certificates, health checks at `/api/v1/health`, and secure inbound network rules. The API sets staff cookies as `Secure` in production.
 7. Register a restaurant owner at `/register` and verify that the new workspace starts empty and displays setup guidance; do not run the development seed against production.

@@ -98,6 +98,8 @@ npm run typecheck
 npm run build
 ```
 
+`npm run build`, `npm run typecheck`, and `npm test` generate the Prisma client automatically. The production build also copies it into `dist/`; run the API with `npm start` after the build. Managed hosts should run `npm run db:deploy` as their pre-deploy migration command, and must build with the Prisma CLI available.
+
 Run frontend commands from `frontend/`:
 
 ```bash
