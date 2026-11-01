@@ -1,0 +1,10 @@
+import { apiRequest } from '../../lib/api/client';
+import type { Menu } from './types';
+export const getCustomerMenu = (token: string, locale: string) => apiRequest<Menu>(`/customer/qr/${encodeURIComponent(token)}/menu?locale=${locale}`);
+export const sendOrder = (token: string, key: string, guestToken: string, body: unknown) => apiRequest<{ reference: string }>(`/customer/qr/${encodeURIComponent(token)}/orders`, { method: 'POST', headers: { 'Idempotency-Key': key, 'X-Guest-Order-Token': guestToken }, body: JSON.stringify(body) });
+export type AssistanceKind = 'WAITER' | 'BILL' | 'HELP';
+export type GuestAssistance = { reference: string; kind: AssistanceKind; status: 'OPEN' | 'ACKNOWLEDGED' | 'RESOLVED'; createdAt: string; updatedAt: string; handledAt: string | null; table: { label: string }; events: { previousStatus: string | null; status: string; note: string | null; createdAt: string }[] };
+export const requestAssistance = (token: string, kind: AssistanceKind) => apiRequest<{ accepted: boolean; reference: string; status: GuestAssistance['status'] }>(`/customer/qr/${encodeURIComponent(token)}/assistance`, { method: 'POST', body: JSON.stringify({ kind }) });
+export const getAssistance = (reference: string) => apiRequest<GuestAssistance>(`/customer/assistance/${encodeURIComponent(reference)}`);
+export type OrderTracking = { reference: string; status: string; paymentStatus: string; currency: string; subtotal: string; total: string; table: string; createdAt: string; items: { name: string; quantity: number; lineTotal: string; customizations: { group: string; option: string }[] }[]; events: { previousStatus: string | null; status: string; note: string | null; createdAt: string }[] };
+export const getOrder = (reference: string) => apiRequest<OrderTracking>(`/customer/orders/${encodeURIComponent(reference)}`);
