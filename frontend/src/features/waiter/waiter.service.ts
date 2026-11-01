@@ -1,0 +1,11 @@
+import { apiRequest } from '../../lib/api/client';
+import type { ManagedRestaurant } from '../management/management.service';
+
+export type WaiterItem = { name: string; quantity: number; unitPrice: string; lineTotal: string; customizations: { group?: string; option: string; priceDelta?: string }[]; specialInstructions: string | null };
+export type WaiterOrder = { id: string; reference: string; status: string; paymentStatus: string; currency: string; subtotal: string; total: string; note: string | null; createdAt: string; updatedAt: string; restaurant: { name: string }; branch: { id: string; name: string }; table: { id: string; label: string }; tableSessionId: string; items: WaiterItem[]; events: { previousStatus: string | null; status: string; note: string | null; createdAt: string; staffName: string | null }[] };
+export type WaiterTable = { id: string; label: string; branch: { id: string; name: string }; isOccupied: boolean; session: null | { openedAt: string; orderCount: number; total: string; currency: string; pendingCount: number } };
+export type WaiterSession = { id: string; openedAt: string; branch: { id: string; name: string }; table: { id: string; label: string }; orderCount: number; pendingCount: number; completedCount: number; total: string; currency: string; orders: { reference: string; status: string; total: string; currency: string; createdAt: string; items: { name: string; quantity: number; customizations: unknown }[] }[] };
+export type WaiterAssistance = { id: string; kind: 'WAITER' | 'BILL' | 'HELP'; status: 'OPEN' | 'ACKNOWLEDGED' | 'RESOLVED'; createdAt: string; updatedAt: string; handledAt: string | null; handledBy: string | null; branch: { id: string; name: string }; table: { id: string; label: string }; events: { previousStatus: string | null; status: string; note: string | null; createdAt: string; staffName: string | null }[] };
+export type WaiterDashboardData = { orders: WaiterOrder[]; sessions: WaiterSession[]; tables: WaiterTable[]; assistanceRequests: WaiterAssistance[]; generatedAt: string };
+export type WaiterApi = <T>(path: string, init?: RequestInit) => Promise<T>;
+export const accessibleRestaurants = () => apiRequest<{ restaurants: ManagedRestaurant[] }>('/management/restaurants');
