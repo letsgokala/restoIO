@@ -554,3 +554,29 @@ a { color: inherit; }
   .dish-card, .floating-cart, .tracking-card, .status-pulse { animation: none; }
   .dish-card, .dish-card:hover, .dish-image > img { transition: none; transform: none; }
 }
+.management-gate-card { box-shadow: 0 20px 70px rgba(40,49,38,.08); }
+.management-gate-card .customer-eyebrow { color: #8a785a; font-size: .62rem; font-weight: 800; letter-spacing: .13em; }
+.management-gate-copy { max-width: 27rem; margin: 0 0 .6rem; color: var(--mg-muted); font-size: .78rem; line-height: 1.65; }
+.management-gate-card .management-primary { min-height: 3rem; gap: .7rem; padding-inline: 1.15rem; }
+.workspace-create-modal { width: min(100%, 54rem); border: 1px solid rgba(255,255,255,.7); }
+.workspace-modal-heading { display: flex; align-items: flex-start; gap: 1rem; margin: .15rem 2.5rem 1.35rem 0; }
+.workspace-modal-mark { width: 2.8rem; height: 2.8rem; flex: 0 0 auto; display: grid; place-items: center; border-radius: .9rem; background: #edf2e6; color: #527450; font-size: 1.3rem; }
+.workspace-modal-heading .customer-eyebrow { margin: 0 0 .25rem; color: #8a785a; font-size: .6rem; font-weight: 800; letter-spacing: .13em; }
+.workspace-modal-heading h2 { margin: 0; color: #293a30; font-size: clamp(1.6rem,4vw,2.05rem); }
+.workspace-modal-heading > div > p:last-child { max-width: 39rem; margin: .4rem 0 0; color: var(--mg-muted); font-size: .76rem; line-height: 1.55; }
+.workspace-form-section { grid-column: 1/-1; display: flex; align-items: center; gap: .7rem; border-top: 1px solid var(--mg-line); padding-top: .85rem; }
+.workspace-form-section > span { width: 1.8rem; height: 1.8rem; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: #f0f2e9; color: #6f7e62; font-size: .58rem; font-weight: 800; }
+.workspace-form-section > div { display: grid; gap: .15rem; }
+.workspace-form-section strong { color: #34473a; font-size: .76rem; }
+.workspace-form-section small { color: var(--mg-muted); font-size: .64rem; }
+.workspace-modal-error { margin: 0 0 1rem; line-height: 1.5; white-space: pre-line; }
+.workspace-create-modal .management-field { gap: .45rem; }
+.workspace-create-modal .management-field input { width: 100%; min-height: 2.8rem; border: 1px solid #dfe3d8; border-radius: .65rem; padding: .65rem .75rem; background: #fff; color: #293a30; font: inherit; font-size: .78rem; outline: none; transition: border-color .16s ease, box-shadow .16s ease; }
+.workspace-create-modal .management-field input:focus { border-color: #71876c; box-shadow: 0 0 0 3px rgba(113,135,108,.14); }
+.workspace-create-modal .management-field input:disabled { background: #f6f6f1; }
+.workspace-create-modal .management-modal-actions { position: sticky; bottom: -1.1rem; margin: 1.3rem -1rem -1rem; padding: .8rem 1rem; background: rgba(255,254,250,.96); backdrop-filter: blur(12px); }
+.workspace-create-modal .management-primary { min-width: 10.5rem; }
+.workspace-button-spinner { width: .85rem; height: .85rem; border: 2px solid rgba(255,255,255,.45); border-top-color: white; border-radius: 50%; animation: workspace-spin .7s linear infinite; }
+@keyframes workspace-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .workspace-button-spinner { animation: none; border-color: white; opacity: .7; } .workspace-create-modal .management-field input { transition: none; } }
+@media (max-width: 680px) { .management-gate-card { padding: 1.4rem 1.1rem; }.management-gate-card h1 { font-size: 1.7rem; }.workspace-modal-heading { gap: .7rem; margin-right: 2.25rem; }.workspace-modal-mark { width: 2.3rem; height: 2.3rem; border-radius: .7rem; }.workspace-create-modal .management-modal-actions { bottom: -1.1rem; margin-inline: -.2rem; padding-inline: .2rem; }.workspace-create-modal .management-modal-actions > button { flex: 1; } }
