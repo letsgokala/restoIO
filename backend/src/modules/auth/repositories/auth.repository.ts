@@ -1,10 +1,16 @@
-import type { PrismaClient } from '../../../generated/prisma/index.js';
+import { Prisma, type PrismaClient } from '../../../generated/prisma/index.js';
+
+export async function acquirePlatformAdminBootstrapLock(tx: Prisma.TransactionClient) {
+  const [result] = await tx.$queryRaw<Array<{ acquired: boolean }>>`SELECT true AS acquired FROM (SELECT pg_advisory_xact_lock(739104, 1)) AS lock`;
+  if (!result?.acquired) throw new Error('PLATFORM_ADMIN_BOOTSTRAP_LOCK_FAILED');
+}
+
 export class AuthRepository {
   constructor(private readonly db: PrismaClient) {}
   findUserByEmail(email: string) { return this.db.user.findUnique({ where: { email }, include: { memberships: { where: { isActive: true, restaurant: { status: { in: ['ACTIVE', 'PENDING'] } }, OR: [{ branchId: null }, { branch: { is: { isActive: true } } }] }, include: { restaurant: true, branch: true } } } }); }
   createFirstPlatformAdmin(input: { email: string; displayName: string; passwordHash: string }) {
     return this.db.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(739104, 1)`;
+      await acquirePlatformAdminBootstrapLock(tx);
       if (await tx.user.count({ where: { isPlatformAdmin: true } })) throw new Error('PLATFORM_ADMIN_EXISTS');
       if (await tx.user.findUnique({ where: { email: input.email }, select: { id: true } })) throw new Error('ADMIN_EMAIL_EXISTS');
       return tx.user.create({ data: { ...input, isPlatformAdmin: true } });
