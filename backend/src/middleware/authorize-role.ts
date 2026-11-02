@@ -3,7 +3,7 @@ import type { UserRole } from '../generated/prisma/index.js';
 import { AppError } from '../shared/errors/app-error.js';
 export const requireRoles = (...allowedRoles: UserRole[]): RequestHandler => (req, _res, next) => {
   if (!req.auth || !req.tenant) return next(new AppError(401, 'TENANT_CONTEXT_REQUIRED', 'Authenticated tenant context is required'));
-  if (req.auth.user.isPlatformAdmin || allowedRoles.includes(req.tenant.role)) return next();
+  if (!req.auth.user.isPlatformAdmin && allowedRoles.includes(req.tenant.role)) return next();
   next(new AppError(403, 'ROLE_FORBIDDEN', 'Your role cannot perform this action'));
 };
 export const requireTenantRoles = (...allowedRoles: UserRole[]): RequestHandler => (req, _res, next) => {
@@ -18,7 +18,7 @@ export const requirePlatformAdmin: RequestHandler = (req, _res, next) => {
 };
 export const requireRestaurantWideAccess: RequestHandler = (req, _res, next) => {
   if (!req.auth || !req.tenant) return next(new AppError(401, 'TENANT_CONTEXT_REQUIRED', 'Authenticated tenant context is required'));
-  if (req.auth.user.isPlatformAdmin || req.tenant.role === 'RESTAURANT_OWNER' || (req.tenant.role === 'MANAGER' && req.tenant.branchId === null)) return next();
+  if (!req.auth.user.isPlatformAdmin && (req.tenant.role === 'RESTAURANT_OWNER' || (req.tenant.role === 'MANAGER' && req.tenant.branchId === null))) return next();
   next(new AppError(403, 'RESTAURANT_WIDE_ACCESS_REQUIRED', 'This action needs restaurant-wide access'));
 };
 export const requireWaiter: RequestHandler = (req, _res, next) => {

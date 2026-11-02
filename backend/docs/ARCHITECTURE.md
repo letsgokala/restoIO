@@ -48,9 +48,9 @@ Socket.IO was evaluated and not added: the persisted API polling path already su
 
 ## Restaurant management flow
 
-`/manage → authenticated identity → accessible restaurant list → X-Restaurant-Id / optional X-Branch-Id → role middleware → management controller/service/repository → Prisma`.
+`/manage → authenticated restaurant owner/manager → active restaurant memberships → X-Restaurant-Id / optional X-Branch-Id → role middleware → management controller/service/repository → Prisma`.
 
-The API derives scope from the signed-in user's active membership or explicit platform-admin status. Owners onboard restaurants and assign staff; owners/managers maintain the permitted operational content. A QR rotation revokes prior active tokens before issuing a new random token, so existing printouts stop resolving. QR images are produced in the browser from the currently opened web origin; for phone scanning, open the workspace through a LAN-reachable address before printing.
+The API derives tenant scope only from the signed-in user's active membership. Platform administrators are denied tenant context and use a separate `/platform` workspace to create restaurant-owner accounts, review signup requests, update account status, and view system usage totals. They cannot enter restaurant operations or manipulate tenant IDs to access tenant routes. Owners manage only restaurants they own and assign staff; owners/managers maintain permitted operational content. A QR rotation revokes prior active tokens before issuing a new random token, so existing printouts stop resolving. QR images are produced in the browser from the currently opened web origin; for phone scanning, open the workspace through a LAN-reachable address before printing.
 
 ## Cashier and reporting flow
 
@@ -60,4 +60,4 @@ Payments are separate records from order lifecycle status. A physical payment lo
 
 `/analytics → owner/manager tenant membership → date/branch-filtered repository aggregates → report DTO`.
 
-Reports distinguish cash actually received from order totals and use the restaurant timezone for daily revenue grouping. Platform account listing/status endpoints use platform-admin-only middleware and do not expose order/customer details. Branch operating hours are persisted as one local-time opening interval per weekday.
+Reports distinguish cash actually received from order totals and use the restaurant timezone for daily revenue grouping. Platform account listing/status/creation endpoints use platform-admin-only middleware. The platform dashboard aggregates restaurant, branch, order and guest-session counts and shows per-restaurant account usage without exposing customer identities or order details. Branch operating hours are persisted as one local-time opening interval per weekday.

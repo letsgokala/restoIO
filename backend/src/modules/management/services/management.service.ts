@@ -29,9 +29,8 @@ export class ManagementService {
   async setPlatformRestaurantStatus(id: string, status: 'PENDING' | 'ACTIVE' | 'SUSPENDED') {
     try { const result = await managementRepository.setRestaurantStatus(id, status); if (!result.count) throw new AppError(404, 'RESTAURANT_NOT_FOUND', 'Restaurant not found'); return { updated: true, status }; } catch (error) { return mapDbError(error); }
   }
-  async listAccessibleRestaurants(userId: string, platformAdmin: boolean) {
-    const records = await managementRepository.accessibleRestaurants(userId, platformAdmin);
-    if (platformAdmin) return (records as Array<{ id: string; name: string; slug: string; currency: string; branches: { id: string; name: string; isActive: boolean }[] }>).map((r) => ({ id: r.id, name: r.name, slug: r.slug, currency: r.currency, role: 'PLATFORM_ADMIN', branchIds: null, branches: r.branches }));
+  async listAccessibleRestaurants(userId: string) {
+    const records = await managementRepository.accessibleRestaurants(userId);
     const memberships = records as Array<{ restaurant: { id: string; name: string; slug: string; currency: string; branches: { id: string; name: string; isActive: boolean }[] }; branchId: string | null; role: UserRole }>;
     const output = new Map<string, { id: string; name: string; slug: string; currency: string; role: UserRole; branchIds: string[] | null; branches: { id: string; name: string; isActive: boolean }[] }>();
     const priority: UserRole[] = [UserRole.RESTAURANT_OWNER, UserRole.MANAGER, UserRole.WAITER, UserRole.KITCHEN, UserRole.CASHIER];
@@ -43,10 +42,12 @@ export class ManagementService {
     return [...output.values()].map((r) => ({ ...r, branchIds: r.branchIds ? [...new Set(r.branchIds)] : null }));
   }
   async createRestaurant(input: { name: string; slug: string; description?: string; logoUrl?: string; coverImageUrl?: string; contactPhone?: string; websiteUrl?: string; currency: string; timezone: string; branchName: string; branchSlug: string; branchAddress?: string; ownerEmail: string; ownerName: string; password: string }) {
-    try { return await managementRepository.createRestaurantWithOwner({ ...input, ownerEmail: input.ownerEmail.toLowerCase(), passwordHash: await argon2.hash(input.password, { type: argon2.argon2id }) }); } catch (error) { return mapDbError(error); }
+    const { password, ...restaurantInput } = input;
+    try { return await managementRepository.createRestaurantWithOwner({ ...restaurantInput, ownerEmail: input.ownerEmail.toLowerCase(), passwordHash: await argon2.hash(password, { type: argon2.argon2id }) }); } catch (error) { return mapDbError(error); }
   }
   async requestRestaurant(input: { name: string; slug: string; description?: string; logoUrl?: string; coverImageUrl?: string; contactPhone?: string; websiteUrl?: string; currency: string; timezone: string; branchName: string; branchSlug: string; branchAddress?: string; ownerEmail: string; ownerName: string; password: string }) {
-    try { return await managementRepository.createRestaurantWithOwner({ ...input, status: 'PENDING', ownerEmail: input.ownerEmail.toLowerCase(), passwordHash: await argon2.hash(input.password, { type: argon2.argon2id }) }); } catch (error) { return mapDbError(error); }
+    const { password, ...restaurantInput } = input;
+    try { return await managementRepository.createRestaurantWithOwner({ ...restaurantInput, status: 'PENDING', ownerEmail: input.ownerEmail.toLowerCase(), passwordHash: await argon2.hash(password, { type: argon2.argon2id }) }); } catch (error) { return mapDbError(error); }
   }
   async createOwnedRestaurant(userId: string, input: { name: string; slug: string; description?: string; logoUrl?: string; coverImageUrl?: string; contactPhone?: string; websiteUrl?: string; currency: string; timezone: string; branchName: string; branchSlug: string; branchAddress?: string }) { try { return await managementRepository.createRestaurantForOwner(userId, input); } catch (error) { return mapDbError(error); } }
   getRestaurant(restaurantId: string) { return managementRepository.getRestaurant(restaurantId).then((r) => { if (!r) throw new AppError(404, 'RESTAURANT_NOT_FOUND', 'Restaurant not found'); return r; }); }

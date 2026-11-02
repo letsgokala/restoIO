@@ -9,10 +9,9 @@ const transitions: Record<string, Partial<Record<OrderStatus, OrderStatus[]>>> =
   CASHIER: { SERVED: [OrderStatus.CLOSED] },
   RESTAURANT_OWNER: { PENDING_CONFIRMATION: [OrderStatus.CONFIRMED, OrderStatus.REJECTED], CONFIRMED: [OrderStatus.CANCELLED], PREPARING: [OrderStatus.CANCELLED], READY: [OrderStatus.SERVED] },
   MANAGER: { PENDING_CONFIRMATION: [OrderStatus.CONFIRMED, OrderStatus.REJECTED], CONFIRMED: [OrderStatus.CANCELLED], PREPARING: [OrderStatus.CANCELLED], READY: [OrderStatus.SERVED] },
-  PLATFORM_ADMIN: { PENDING_CONFIRMATION: [OrderStatus.CONFIRMED, OrderStatus.REJECTED], CONFIRMED: [OrderStatus.CANCELLED], PREPARING: [OrderStatus.CANCELLED], READY: [OrderStatus.SERVED] },
 };
 const completedStatuses = new Set<OrderStatus>([OrderStatus.SERVED, OrderStatus.CLOSED]);
-const assistanceRoles = new Set<UserRole>([UserRole.WAITER, UserRole.MANAGER, UserRole.RESTAURANT_OWNER, UserRole.PLATFORM_ADMIN]);
+const assistanceRoles = new Set<UserRole>([UserRole.WAITER, UserRole.MANAGER, UserRole.RESTAURANT_OWNER]);
 
 export class WaiterService {
   async getDashboard(restaurantId: string, branchId: string | null, filters: { status?: OrderStatus; tableId?: string; date?: string; search?: string }) {

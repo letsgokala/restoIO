@@ -99,7 +99,7 @@ Every seeded account uses the value of `SEED_ADMIN_PASSWORD` in `backend/.env`. 
 
 | Email | Role | Restaurant / branch | Workspace and test |
 | --- | --- | --- | --- |
-| `admin@demo.local` | Platform administrator | Platform-wide | `/platform`: inspect account status; `/manage`: provision a restaurant and owner. Email follows `SEED_ADMIN_EMAIL`. |
+| `admin@demo.local` | Platform administrator | Platform-wide account operations | `/platform`: create restaurant-owner accounts, review requests, update account status, and inspect platform usage. Tenant tools are denied. Email follows `SEED_ADMIN_EMAIL`. |
 | `owner@blue-nile.demo.local` | Restaurant owner | Blue Nile Café, all branches | `/manage`: profile, branches, team, hours, tables, QR codes, and menu; `/analytics`: database-backed reports. |
 | `waiter@blue-nile.demo.local` | Waiter | Blue Nile Café, Bole Branch | `/waiter`: accept/reject orders, handle assistance, and mark ready orders served. |
 | `kitchen@blue-nile.demo.local` | Kitchen | Blue Nile Café, Bole Branch | `/kitchen`: start confirmed tickets and mark individual items ready. |
@@ -151,7 +151,9 @@ Then restart both servers, run the frontend with `npm run dev -- --hostname 0.0.
 2. Confirm Blue Nile Café appears with owner and branch counts.
 3. Suspend it, then sign in or use an owner session to request a tenant API resource. The backend should reject tenant access while suspended.
 4. Reactivate it. Owner access should work again.
-5. Open `/manage` as the platform account and create a test restaurant with a unique slug, owner email, and password. The owner should be able to sign in and see only that restaurant.
+5. Open `/platform` as the platform account and create a test restaurant-owner account with a unique workspace slug, owner email, and password. The owner should be able to sign in and see only restaurants with their active memberships.
+6. As the platform administrator, open `/manage` and try a tenant API request with an `X-Restaurant-Id`; platform access should redirect to `/platform` in the UI and return `403` from tenant APIs.
+7. As a waiter, kitchen, or cashier, open `/manage` directly; the UI should route to that role's workspace, and API role checks must reject unrelated actions.
 
 ### Restaurant settings, branches, and operating hours
 

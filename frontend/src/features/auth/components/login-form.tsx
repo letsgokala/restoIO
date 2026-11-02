@@ -12,7 +12,7 @@ export function LoginForm() {
   const onSubmit = handleSubmit(async ({ email, password }) => {
     const result = await auth.signIn(email, password);
     if (result) {
-      const hasManagementAccess = result.user.isPlatformAdmin || result.memberships.some((membership) => ['RESTAURANT_OWNER', 'MANAGER'].includes(membership.role));
+      const hasManagementAccess = result.memberships.some((membership) => ['RESTAURANT_OWNER', 'MANAGER'].includes(membership.role));
       const hasWaiterAccess = result.memberships.some((membership) => membership.role === 'WAITER');
       const hasKitchenAccess = result.memberships.some((membership) => membership.role === 'KITCHEN');
       window.location.assign(result.user.isPlatformAdmin ? '/platform' : hasManagementAccess ? '/manage' : hasKitchenAccess ? '/kitchen' : hasWaiterAccess ? '/waiter' : result.memberships.some((membership) => membership.role === 'CASHIER') ? '/cashier' : '/manage');

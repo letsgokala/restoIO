@@ -14,10 +14,10 @@ describe('AuthService tenant scope', () => {
     await expect(service.authorizeTenant('user-1', false, 'restaurant-1', 'branch-other')).rejects.toMatchObject({ status: 404, code: 'BRANCH_NOT_FOUND' });
     expect(repo.findMembership).not.toHaveBeenCalled();
   });
-  it('requires a platform administrator for platform-wide bypass', async () => {
+  it('does not provide any platform-wide tenant bypass', async () => {
     const repo = { findMembership: vi.fn() } as never;
     const service = new AuthService(repo, 12);
-    await service.authorizeTenant('admin-1', true, 'restaurant-1');
-    expect(repo.findMembership).not.toHaveBeenCalled();
+    await expect(service.authorizeTenant('admin-1', 'restaurant-1')).rejects.toMatchObject({ status: 403, code: 'TENANT_FORBIDDEN' });
+    expect(repo.findMembership).toHaveBeenCalledWith('admin-1', 'restaurant-1', undefined);
   });
 });

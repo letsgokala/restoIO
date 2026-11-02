@@ -6,5 +6,4 @@ export type ManagedItem = { id: string; publicId: string; categoryId: string; na
 export type ManagedModifierGroup = { id: string; name: string; isRequired: boolean; minSelections: number; maxSelections: number; translations: { locale: string; name: string }[]; options: { id: string; name: string; priceDelta: string; isAvailable: boolean; translations: { locale: string; name: string }[] }[] };
 export type TenantApi = <T>(path: string, init?: RequestInit) => Promise<T>;
 export const getAccessibleRestaurants = () => apiRequest<{ restaurants: ManagedRestaurant[] }>('/management/restaurants');
-export const createRestaurantAsPlatformAdmin = (body: unknown) => apiRequest('/platform/restaurants', { method: 'POST', body: JSON.stringify(body) });
 export const createRestaurantAsOwner = (body: unknown) => apiRequest('/management/restaurants', { method: 'POST', body: JSON.stringify(body) });

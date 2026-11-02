@@ -8,8 +8,7 @@ export class ManagementRepository {
     return prisma.restaurant.findMany({ orderBy: { createdAt: 'desc' }, select: { id: true, name: true, slug: true, status: true, currency: true, timezone: true, createdAt: true, branches: { select: { id: true, name: true, isActive: true } }, memberships: { where: { role: 'RESTAURANT_OWNER', isActive: true, branchId: null }, select: { user: { select: { email: true, displayName: true } } }, take: 1 }, _count: { select: { orders: true, tableSessions: true } } } });
   }
   setRestaurantStatus(id: string, status: 'PENDING' | 'ACTIVE' | 'SUSPENDED') { return prisma.restaurant.updateMany({ where: { id }, data: { status } }); }
-  accessibleRestaurants(userId: string, platformAdmin: boolean) {
-    if (platformAdmin) return prisma.restaurant.findMany({ orderBy: { name: 'asc' }, include: { branches: { orderBy: { name: 'asc' }, select: { id: true, name: true, isActive: true } } } });
+  accessibleRestaurants(userId: string) {
     return prisma.membership.findMany({ where: { userId, isActive: true, restaurant: { status: 'ACTIVE' }, OR: [{ branchId: null }, { branch: { is: { isActive: true } } }] }, include: { restaurant: { include: { branches: { orderBy: { name: 'asc' }, select: { id: true, name: true, isActive: true } } } }, branch: true }, orderBy: { createdAt: 'asc' } });
   }
   async createRestaurantForOwner(userId: string, input: { name: string; slug: string; description?: string; logoUrl?: string; coverImageUrl?: string; contactPhone?: string; websiteUrl?: string; currency: string; timezone: string; branchName: string; branchSlug: string; branchAddress?: string }) {

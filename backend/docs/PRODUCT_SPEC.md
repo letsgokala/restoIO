@@ -26,13 +26,13 @@ Branch-assigned kitchen staff use `/kitchen` to work only accepted tickets. Star
 
 Cashiers use `/cashier` to record received cash, pay-at-counter, pay-waiter, or other offline payments against consolidated table sessions. Payments are persistent Decimal ledger records, can be partial, are idempotent, allocated across orders, and remain separate from READY/SERVED order status. A table session closes only when its balance is zero and its active orders have been served. Owner/manager voids require reasons and preserve the audit trail.
 
-Restaurant owners/managers can view date- and branch-filtered sales, payment, order, menu-item and operational metrics at `/analytics`. Platform administrators use `/platform` to inspect account-level metadata and activate/suspend restaurants. Branch weekly hours are configurable as one local-time interval per weekday.
+Restaurant owners/managers can view date- and branch-filtered sales, payment, order, menu-item and operational metrics at `/analytics`. Platform administrators use `/platform` to create restaurant-owner accounts, review signup requests, activate or suspend restaurants, and inspect platform-wide usage totals plus restaurant-level account, branch, order, and guest-session counts. Platform administrators do not enter restaurant workspaces or manage their tables, menus, staff, payments, or operations. Branch weekly hours are configurable as one local-time interval per weekday.
 
 Chapa/Telebirr provider contracts are scaffolded but online payment processing is disabled. Managed image upload/storage is also not configured; menu images use external URLs. See `docs/MANUAL_TESTING_GUIDE.md` for the tested local flows and explicit production limitations.
 
 ## Users and access
 
-The initial role vocabulary is `PLATFORM_ADMIN`, `RESTAURANT_OWNER`, `MANAGER`, `WAITER`, `KITCHEN` and `CASHIER`. Restaurant access is granted through explicit active memberships. Memberships may apply to one branch or the whole restaurant. A platform admin can select a tenant for platform operations. Customer accounts are not part of the product direction.
+The initial role vocabulary is `PLATFORM_ADMIN`, `RESTAURANT_OWNER`, `MANAGER`, `WAITER`, `KITCHEN` and `CASHIER`. Restaurant access is granted through explicit active memberships. Memberships may apply to one branch or the whole restaurant. Platform administrators have platform-wide account and usage visibility, but tenant APIs require a restaurant membership and never grant access through the platform-admin role. Restaurant owners can access only their own restaurant memberships; other staff roles use their waiter, kitchen, or cashier workspace. Customer accounts are not part of the product direction.
 
 ## Market defaults
 

@@ -10,7 +10,7 @@ const id = z.string().cuid();
 const tenant = (req: Parameters<RequestHandler>[0]) => { if (!req.tenant) throw new AppError(401, 'TENANT_CONTEXT_REQUIRED', 'Authenticated tenant context is required'); return req.tenant; };
 const noStore = (_req: Parameters<RequestHandler>[0], res: Parameters<RequestHandler>[1]) => res.setHeader('Cache-Control', 'no-store');
 
-export const listManagedRestaurants: RequestHandler = async (req, res) => { noStore(req, res); res.json({ restaurants: await managementService.listAccessibleRestaurants(req.auth!.user.id, req.auth!.user.isPlatformAdmin) }); };
+export const listManagedRestaurants: RequestHandler = async (req, res) => { noStore(req, res); if (req.auth!.user.isPlatformAdmin) throw new AppError(403, 'PLATFORM_TENANT_ACCESS_FORBIDDEN', 'Platform administrators must use the platform workspace'); res.json({ restaurants: await managementService.listAccessibleRestaurants(req.auth!.user.id) }); };
 export const createOwnedRestaurant: RequestHandler = async (req, res) => { noStore(req, res); res.status(201).json(await managementService.createOwnedRestaurant(req.auth!.user.id, createOwnedRestaurantSchema.parse(req.body))); };
 export const createManagedRestaurant: RequestHandler = async (req, res) => { noStore(req, res); res.status(201).json(await managementService.createRestaurant(createRestaurantSchema.parse(req.body))); };
 export const listPlatformRestaurants: RequestHandler = async (req, res) => { noStore(req, res); res.json({ restaurants: await managementService.listPlatformRestaurants() }); };

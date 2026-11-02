@@ -35,9 +35,8 @@ export class AuthService {
     if (!session) throw new AppError(401, 'UNAUTHENTICATED', 'Sign in to continue');
     return { user: { id: session.user.id, email: session.user.email, displayName: session.user.displayName, isPlatformAdmin: session.user.isPlatformAdmin }, sessionId: session.id, restaurantId: session.restaurantId };
   }
-  async authorizeTenant(userId: string, isPlatformAdmin: boolean, restaurantId: string, branchId?: string) {
+  async authorizeTenant(userId: string, restaurantId: string, branchId?: string) {
     if (branchId && !(await this.repository.findActiveBranch(restaurantId, branchId))) throw new AppError(404, 'BRANCH_NOT_FOUND', 'The requested active branch was not found');
-    if (isPlatformAdmin) return { restaurantId, branchId: branchId ?? null, role: 'PLATFORM_ADMIN' as const };
     const membership = await this.repository.findMembership(userId, restaurantId, branchId);
     if (!membership) throw new AppError(403, 'TENANT_FORBIDDEN', 'You do not have access to this restaurant or branch');
     return { restaurantId, branchId: branchId ?? (membership.role === 'RESTAURANT_OWNER' ? null : membership.branchId), role: membership.role };
