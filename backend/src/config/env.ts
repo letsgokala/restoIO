@@ -13,10 +13,18 @@ const envSchema = z.object({
   SESSION_TTL_HOURS: z.coerce.number().int().positive().max(720).default(12),
   QR_TOKEN_ENCRYPTION_KEY: z.string().min(32).default('restoio-local-qr-encryption-key-32'),
   PLATFORM_ADMIN_BOOTSTRAP_TOKEN: z.string().min(32).optional(),
+  SMTP_HOST: z.string().min(1).optional(),
+  SMTP_PORT: z.coerce.number().int().positive().default(465),
+  SMTP_SECURE: z.enum(['true', 'false']).default('true').transform((value) => value === 'true'),
+  SMTP_USER: z.string().email().optional(),
+  SMTP_PASSWORD: z.string().min(1).optional(),
+  EMAIL_FROM: z.string().email().optional(),
   SEED_ADMIN_EMAIL: z.string().email().default('admin@demo.local'),
   SEED_ADMIN_PASSWORD: z.string().min(12).default('ChangeMe_OnlyForLocalDev_123!'),
 });
 export const env = envSchema.parse(process.env);
+if (env.SMTP_HOST && (!env.SMTP_USER || !env.SMTP_PASSWORD)) throw new Error('SMTP_USER and SMTP_PASSWORD are required when SMTP_HOST is configured');
+if ((env.SMTP_USER || env.SMTP_PASSWORD || env.EMAIL_FROM) && !env.SMTP_HOST) throw new Error('SMTP_HOST is required when email settings are configured');
 if (env.NODE_ENV === 'production') {
   if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL must be configured in production');
   if (!process.env.WEB_ORIGIN || new URL(env.WEB_ORIGIN).protocol !== 'https:') throw new Error('WEB_ORIGIN must be an HTTPS origin in production');

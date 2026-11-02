@@ -7,6 +7,7 @@ export const managementRouter = Router();
 managementRouter.get('/management/restaurants', authenticate, controller.listManagedRestaurants);
 managementRouter.post('/management/restaurants', authenticate, controller.createOwnedRestaurant);
 managementRouter.post('/platform/restaurants', authenticate, requirePlatformAdmin, controller.createManagedRestaurant);
+managementRouter.post('/platform/admin/notification', authenticate, requirePlatformAdmin, controller.sendPlatformAdminNotification);
 managementRouter.get('/platform/restaurants', authenticate, requirePlatformAdmin, controller.listPlatformRestaurants);
 managementRouter.patch('/platform/restaurants/:restaurantId/status', authenticate, requirePlatformAdmin, controller.updatePlatformRestaurantStatus);
 managementRouter.use('/tenant', authenticate, requireTenant);

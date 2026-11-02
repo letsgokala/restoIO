@@ -74,7 +74,7 @@ Platform administrators land at `/platform` to view and suspend/reactivate resta
 
 ### Production onboarding without demo seed data
 
-Production restaurants do not depend on `npm run db:seed`. The API applies pending Prisma migrations before it starts. Create the first platform administrator by setting a random `PLATFORM_ADMIN_BOOTSTRAP_TOKEN` (at least 32 characters) in the backend host, deploying, then visiting `/platform/bootstrap` and submitting that token with the administrator's details. This one-time endpoint refuses to create another administrator after the first exists. Remove the bootstrap token from the backend environment afterward. Sign in at `/login`; platform administrators are sent to `/platform` and can review cafe signup requests or create accounts from `/manage`.
+Production restaurants do not depend on `npm run db:seed`. The API applies pending Prisma migrations before it starts. Create the first platform administrator by setting a random `PLATFORM_ADMIN_BOOTSTRAP_TOKEN` (at least 32 characters) in the backend host, deploying, then visiting `/platform/bootstrap` and submitting that token with the administrator's details. This one-time endpoint refuses to create another administrator after the first exists. Remove the bootstrap token from the backend environment afterward. Sign in at `/login`; platform administrators are sent to `/platform` and can review cafe signup requests or create accounts from `/manage`. To email the account-created confirmation, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, and `SMTP_PASSWORD` on the backend; `EMAIL_FROM` is optional and defaults to the SMTP mailbox. The platform dashboard can resend the confirmation after sign-in. Never add SMTP credentials to Vercel/frontend settings.
 
 Public registration is limited to five attempts per IP per hour and requires a 12-character password. Signup creates a `PENDING` restaurant and owner; the owner cannot sign in until a platform administrator approves it in `/platform`. The administrator must notify the owner outside the app because email verification and outbound email are not configured. Bot protection and password reset are also not configured; consider those before broadly advertising registration.
 
@@ -120,6 +120,7 @@ For disposable local data only, `docker compose down -v` removes the database vo
 - `POST /api/v1/auth/login`: validates credentials and sets an HTTP-only session cookie.
 - `POST /api/v1/auth/register-restaurant`: rate-limited public signup request that creates a pending restaurant, owner, and first branch atomically.
 - `POST /api/v1/auth/bootstrap-platform-admin`: one-time token-protected creation of the first platform administrator; unavailable after an administrator exists.
+- `POST /api/v1/platform/admin/notification`: platform-admin-only resend of the administrator account confirmation email.
 - `GET /api/v1/auth/me`: returns the signed-in staff profile.
 - `POST /api/v1/auth/logout`: revokes the session and clears its cookie.
 - `GET /api/v1/tenant/context`: requires a session and `X-Restaurant-Id`, with optional `X-Branch-Id`.

@@ -5,6 +5,7 @@ import { authService } from '../services/auth-factory.js';
 import { AppError } from '../../../shared/errors/app-error.js';
 import { managementService } from '../../management/services/management.service.js';
 import { bootstrapPlatformAdminSchema } from '../validators/auth.validator.js';
+import { adminNotificationService } from '../services/admin-notification.service.js';
 const cookieOptions = { httpOnly: true, secure: env.NODE_ENV === 'production', sameSite: 'strict' as const, path: '/api/v1', maxAge: env.SESSION_TTL_HOURS * 3600000 };
 export const registerRestaurant: RequestHandler = async (req, res) => {
   const created = await managementService.requestRestaurant(req.body);
@@ -17,7 +18,10 @@ export const bootstrapPlatformAdmin: RequestHandler = async (req, res) => {
   const provided = Buffer.from(input.token);
   if (!expected.length || expected.length !== provided.length || !timingSafeEqual(expected, provided)) throw new AppError(404, 'BOOTSTRAP_UNAVAILABLE', 'Platform administrator setup is unavailable');
   await authService.bootstrapPlatformAdmin({ email: input.email, displayName: input.displayName, password: input.password });
-  res.status(201).json({ created: true, message: 'Platform administrator created. Sign in to continue.' });
+  let notificationSent = false;
+  try { notificationSent = await adminNotificationService.sendCreatedConfirmation({ email: input.email, displayName: input.displayName, loginUrl: env.WEB_ORIGIN + '/login' }); }
+  catch (error) { console.error(JSON.stringify({ level: 'error', event: 'platform_admin_notification_failed', requestId: req.requestId, message: error instanceof Error ? error.message : 'Email delivery failed' })); }
+  res.status(201).json({ created: true, notificationSent, message: notificationSent ? 'Platform administrator created and confirmation email sent.' : 'Platform administrator created. Email delivery is not configured; sign in to continue.' });
 };
 export const login: RequestHandler = async (req, res) => { const result = await authService.login(req.body); res.cookie(env.SESSION_COOKIE_NAME, result.token, cookieOptions); res.status(200).json(result.body); };
 export const me: RequestHandler = (req, res) => { if (!req.auth) throw new AppError(401, 'UNAUTHENTICATED', 'Sign in to continue'); res.json({ user: req.auth.user, restaurantId: req.auth.restaurantId }); };

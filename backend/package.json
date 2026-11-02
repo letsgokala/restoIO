@@ -23,6 +23,7 @@
     "express": "^5.1.0",
     "express-rate-limit": "^8.1.0",
     "helmet": "^8.1.0",
+    "nodemailer": "^7.0.13",
     "prisma": "^6.19.0",
     "zod": "^3.25.76"
   },
@@ -31,6 +32,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^22.15.30",
+    "@types/nodemailer": "^7.0.12",
     "@types/supertest": "^6.0.3",
     "dotenv-cli": "^10.0.0",
     "supertest": "^7.1.4",

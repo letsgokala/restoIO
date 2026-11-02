@@ -27,7 +27,7 @@ export function LoginForm() {
       <input id="login-password" autoComplete="current-password" type="password" required aria-invalid={Boolean(errors.password)} aria-describedby={errors.password ? 'login-password-error' : undefined} {...register('password')} className="form-input" />
       {errors.password && <span id="login-password-error" className="form-error">{errors.password.message}</span>}
     </label>
-    {auth.error && <p role="alert" className="form-error">{t('failed')}</p>}
+    {auth.error && <p role="alert" className="form-error">{auth.error}</p>}
     <Button className="button--full" disabled={auth.loading}>{auth.loading ? t('submitting') : t('submit')}<span aria-hidden="true">→</span></Button>
   </form>;
 }

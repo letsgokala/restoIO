@@ -20,6 +20,7 @@
   --ease-out: cubic-bezier(.2, .75, .25, 1);
 }
 .platform-status.pending { background: #fff5df; color: #8c6422; }
+.platform-notice { max-width: 76rem; margin: 1rem auto; color: #426d43; }
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }

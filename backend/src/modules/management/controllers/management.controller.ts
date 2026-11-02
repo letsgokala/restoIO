@@ -1,8 +1,10 @@
 import type { RequestHandler } from 'express';
 import { z } from 'zod';
+import { env } from '../../../config/env.js';
 import { managementService } from '../services/management.service.js';
 import { createRestaurantSchema, createOwnedRestaurantSchema, restaurantUpdateSchema, createBranchSchema, updateBranchSchema, branchHoursSchema, createStaffSchema, updateStaffSchema, createTableSchema, updateTableSchema, createCategorySchema, updateCategorySchema, createMenuItemSchema, updateMenuItemSchema } from '../validators/management.validator.js';
 import { AppError } from '../../../shared/errors/app-error.js';
+import { adminNotificationService } from '../../auth/services/admin-notification.service.js';
 
 const id = z.string().cuid();
 const tenant = (req: Parameters<RequestHandler>[0]) => { if (!req.tenant) throw new AppError(401, 'TENANT_CONTEXT_REQUIRED', 'Authenticated tenant context is required'); return req.tenant; };
@@ -12,6 +14,12 @@ export const listManagedRestaurants: RequestHandler = async (req, res) => { noSt
 export const createOwnedRestaurant: RequestHandler = async (req, res) => { noStore(req, res); res.status(201).json(await managementService.createOwnedRestaurant(req.auth!.user.id, createOwnedRestaurantSchema.parse(req.body))); };
 export const createManagedRestaurant: RequestHandler = async (req, res) => { noStore(req, res); res.status(201).json(await managementService.createRestaurant(createRestaurantSchema.parse(req.body))); };
 export const listPlatformRestaurants: RequestHandler = async (req, res) => { noStore(req, res); res.json({ restaurants: await managementService.listPlatformRestaurants() }); };
+export const sendPlatformAdminNotification: RequestHandler = async (req, res) => {
+  noStore(req, res);
+  const sent = await adminNotificationService.sendCreatedConfirmation({ email: req.auth!.user.email, displayName: req.auth!.user.displayName, loginUrl: `${env.WEB_ORIGIN}/login` });
+  if (!sent) throw new AppError(503, 'EMAIL_NOT_CONFIGURED', 'Email delivery is not configured on the API server');
+  res.json({ sent: true });
+};
 export const updatePlatformRestaurantStatus: RequestHandler = async (req, res) => { noStore(req, res); const status = z.enum(['PENDING', 'ACTIVE', 'SUSPENDED']).parse(req.body.status); res.json(await managementService.setPlatformRestaurantStatus(id.parse(req.params.restaurantId), status)); };
 export const getRestaurant: RequestHandler = async (req, res) => { noStore(req, res); res.json(await managementService.getRestaurant(tenant(req).restaurantId)); };
 export const updateRestaurant: RequestHandler = async (req, res) => { noStore(req, res); const input = restaurantUpdateSchema.parse(req.body); res.json(await managementService.updateRestaurant(tenant(req).restaurantId, { ...input, ...(input.logoUrl !== undefined ? { logoUrl: input.logoUrl || null } : {}), ...(input.coverImageUrl !== undefined ? { coverImageUrl: input.coverImageUrl || null } : {}), ...(input.websiteUrl !== undefined ? { websiteUrl: input.websiteUrl || null } : {}) })); };
