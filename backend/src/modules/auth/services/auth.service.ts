@@ -9,7 +9,8 @@ const fakePasswordHash = '$argon2id$v=19$m=65536,t=3,p=4$cmFuZG9tU2FsdFZhbHVlMTI
 export class AuthService {
   constructor(private readonly repository: AuthRepository, private readonly sessionTtlHours: number) {}
   async bootstrapPlatformAdmin(input: { email: string; displayName: string; password: string }) {
-    try { return await this.repository.createFirstPlatformAdmin({ ...input, passwordHash: await argon2.hash(input.password, { type: argon2.argon2id }) }); }
+    const passwordHash = await argon2.hash(input.password, { type: argon2.argon2id });
+    try { return await this.repository.createFirstPlatformAdmin({ email: input.email, displayName: input.displayName, passwordHash }); }
     catch (error) {
       if (error instanceof Error && error.message === 'PLATFORM_ADMIN_EXISTS') throw new AppError(409, 'PLATFORM_ADMIN_EXISTS', 'The initial platform administrator has already been created');
       if (error instanceof Error && error.message === 'ADMIN_EMAIL_EXISTS') throw new AppError(409, 'ADMIN_EMAIL_EXISTS', 'That email already belongs to an account. Choose a new email for the platform administrator.');
