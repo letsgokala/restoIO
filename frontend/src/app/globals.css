@@ -570,6 +570,11 @@ a { color: inherit; }
 .workspace-form-section strong { color: #34473a; font-size: .76rem; }
 .workspace-form-section small { color: var(--mg-muted); font-size: .64rem; }
 .workspace-modal-error { margin: 0 0 1rem; line-height: 1.5; white-space: pre-line; }
+.workspace-error-toast { position: fixed; z-index: 60; top: 1rem; right: 1rem; width: min(35rem, calc(100vw - 2rem)); display: grid; grid-template-columns: 1.8rem minmax(0,1fr) 1.5rem; align-items: start; gap: .7rem; border: 1px solid #e8c3b2; border-radius: .85rem; padding: .85rem 1rem; background: #fffaf6; color: #653d2f; box-shadow: 0 16px 50px rgba(39,36,28,.2); }
+.workspace-error-toast > span { width: 1.5rem; height: 1.5rem; display: grid; place-items: center; border-radius: 50%; background: #f7e6dc; color: #a95136; font-weight: 850; }
+.workspace-error-toast strong { display: block; margin: .1rem 0 .25rem; font-size: .76rem; }
+.workspace-error-toast p { margin: 0; color: #755a4e; font-size: .68rem; line-height: 1.5; white-space: pre-line; overflow-wrap: anywhere; }
+.workspace-error-toast button { border: 0; background: transparent; color: #765a4d; font-size: 1.2rem; cursor: pointer; }
 .workspace-create-modal .management-field { gap: .45rem; }
 .workspace-create-modal .management-field input { width: 100%; min-height: 2.8rem; border: 1px solid #dfe3d8; border-radius: .65rem; padding: .65rem .75rem; background: #fff; color: #293a30; font: inherit; font-size: .78rem; outline: none; transition: border-color .16s ease, box-shadow .16s ease; }
 .workspace-create-modal .management-field input:focus { border-color: #71876c; box-shadow: 0 0 0 3px rgba(113,135,108,.14); }
@@ -579,4 +584,4 @@ a { color: inherit; }
 .workspace-button-spinner { width: .85rem; height: .85rem; border: 2px solid rgba(255,255,255,.45); border-top-color: white; border-radius: 50%; animation: workspace-spin .7s linear infinite; }
 @keyframes workspace-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .workspace-button-spinner { animation: none; border-color: white; opacity: .7; } .workspace-create-modal .management-field input { transition: none; } }
-@media (max-width: 680px) { .management-gate-card { padding: 1.4rem 1.1rem; }.management-gate-card h1 { font-size: 1.7rem; }.workspace-modal-heading { gap: .7rem; margin-right: 2.25rem; }.workspace-modal-mark { width: 2.3rem; height: 2.3rem; border-radius: .7rem; }.workspace-create-modal .management-modal-actions { bottom: -1.1rem; margin-inline: -.2rem; padding-inline: .2rem; }.workspace-create-modal .management-modal-actions > button { flex: 1; } }
+@media (max-width: 680px) { .management-gate-card { padding: 1.4rem 1.1rem; }.management-gate-card h1 { font-size: 1.7rem; }.workspace-modal-heading { gap: .7rem; margin-right: 2.25rem; }.workspace-modal-mark { width: 2.3rem; height: 2.3rem; border-radius: .7rem; }.workspace-create-modal .management-modal-actions { bottom: -1.1rem; margin-inline: -.2rem; padding-inline: .2rem; }.workspace-create-modal .management-modal-actions > button { flex: 1; }.workspace-error-toast { top: .5rem; right: .5rem; width: calc(100vw - 1rem); padding: .7rem; } }
