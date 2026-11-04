@@ -15,19 +15,18 @@ export default async function LoginPage() {
           <h2 className="display-type">{t('visualTitle')}</h2>
           <p>{t('visualDescription')}</p>
         </div>
-        <div className="login-photo-label">{t('stockLabel')}</div>
       </div>
     </section>
     <section className="login-panel">
       <div className="login-content">
         <div className="mobile-brand"><Brand /></div>
-        <div className="eyebrow"><span className="eyebrow-mark" aria-hidden="true" />RestoIO workspace</div>
+        <div className="eyebrow"><span className="eyebrow-mark" aria-hidden="true" />{t('workspace')}</div>
         <h1 className="display-type login-title">{t('title')}</h1>
         <p className="login-subtitle">{t('subtitle')}</p>
         <LoginForm />
         <p className="login-footnote">{t('accessNote')}</p>
-        <p className="login-footnote">New to RestoIO? <Link href="/register">Create a restaurant account</Link></p>
-        <Link className="back-link" href="/">← Back to RestoIO</Link>
+        <p className="login-footnote">{t('newToResto')} <Link href="/register">{t('createAccount')}</Link></p>
+        <Link className="back-link" href="/">← {t('backToResto')}</Link>
       </div>
     </section>
   </main>;

@@ -1,5 +1,7 @@
 import { PlatformBootstrapForm } from '@/features/platform/components/platform-bootstrap-form';
+import { getTranslations } from 'next-intl/server';
 
-export default function PlatformBootstrapPage() {
-  return <main className="login-shell"><section className="login-panel register-panel"><div className="login-content"><div className="eyebrow">ONE-TIME PLATFORM SETUP</div><h1 className="display-type login-title">Create the platform administrator</h1><p className="login-subtitle">This setup works only while the server has no platform administrator and the one-time setup token is configured.</p><PlatformBootstrapForm/></div></section></main>;
+export default async function PlatformBootstrapPage() {
+  const t = await getTranslations('App');
+  return <main className="login-shell"><section className="login-panel register-panel"><div className="login-content"><div className="eyebrow">{t('oneTimePlatformSetup')}</div><h1 className="display-type login-title">{t('createPlatformAdmin')}</h1><p className="login-subtitle">{t('bootstrapDescription')}</p><PlatformBootstrapForm/></div></section></main>;
 }

@@ -7,35 +7,20 @@ Multi-tenant restaurant ordering and operations platform. The repository contain
 - Node.js 20.9 or newer and npm 10+
 - Docker Engine with Docker Compose
 
-## Local setup
+## Local setup with Docker
 
-In a terminal:
-
-```bash
-cd backend
-cp .env.example .env
-npm install
-docker compose up -d postgres
-npm run db:generate
-npm run db:migrate
-npm run db:seed
-npm run dev
-```
-
-In a second terminal:
+From the repository root, build and start PostgreSQL, the API, and the web app:
 
 ```bash
-cd frontend
-cp .env.example .env.local
-npm install
-npm run dev
+docker compose up --build -d
+docker compose run --rm backend npm run db:seed
 ```
 
 Open <http://localhost:3000>. The guest ordering demonstration is at <http://localhost:3000/q/demo-table-01-qr-token-for-local-development-only> (Blue Nile Café, Bole Branch, Table 01). The API is available at <http://localhost:4000/api/v1/health>; staff sign-in is at <http://localhost:3000/login>.
 
 While running locally, the backend terminal prints one JSON access line per API request with method, redacted path, status, duration, and request ID. It does not log request bodies, cookies, or guest tokens. Next.js development server output appears in the frontend terminal.
 
-PostgreSQL runs on host port `55432` to avoid common local PostgreSQL port conflicts. Adjust `DATABASE_URL` in `backend/.env` and the host mapping in `backend/docker-compose.yml` if that port is unavailable.
+The web app is at <http://localhost:3000>, the API at <http://localhost:4000>, and PostgreSQL is published on host port `55432`. The API container waits for PostgreSQL and runs pending Prisma migrations on startup. Adjust the port mappings in the root `docker-compose.yml` if any of these host ports are unavailable.
 
 The seed creates a fictional Blue Nile Café at its Bole branch, five tables, three sample menu items, a local-only QR for Table 01, demo owner, waiter, kitchen, and cashier accounts, and one development platform administrator. Doro wat includes a sample optional extra-injera modifier for checkout and kitchen ticket previews. Menu image fields accept external URLs. Configure local staff credentials with `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` in `backend/.env`; seeded restaurant staff use the same development password. Example credentials and the predictable demo QR are development-only. Seeding refuses to run when `NODE_ENV=production`.
 

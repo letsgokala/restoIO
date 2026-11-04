@@ -2,13 +2,14 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
-import { loginSchema, type LoginFormValues } from '../schemas/login.schema';
+import { createLoginSchema, type LoginFormValues } from '../schemas/login.schema';
 import { useAuth } from '../hooks/use-auth';
 import { Button } from '@/components/ui/button';
 export function LoginForm() {
   const t = useTranslations('Auth');
   const auth = useAuth();
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema) });
+  const schema = createLoginSchema({ emailInvalid: t('emailInvalid'), passwordRequired: t('passwordRequired') });
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({ resolver: zodResolver(schema) });
   const onSubmit = handleSubmit(async ({ email, password }) => {
     const result = await auth.signIn(email, password);
     if (result) {

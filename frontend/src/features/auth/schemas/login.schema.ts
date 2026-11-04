@@ -1,3 +1,6 @@
 import { z } from 'zod';
-export const loginSchema = z.object({ email: z.string().email('Enter a valid email address'), password: z.string().min(1, 'Enter your password') });
-export type LoginFormValues = z.infer<typeof loginSchema>;
+export const createLoginSchema = (messages: { emailInvalid: string; passwordRequired: string }) => z.object({
+  email: z.string().email(messages.emailInvalid),
+  password: z.string().min(1, messages.passwordRequired),
+});
+export type LoginFormValues = z.infer<ReturnType<typeof createLoginSchema>>;
