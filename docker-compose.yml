@@ -1,0 +1,57 @@
+name: restoio
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: restoio
+      POSTGRES_PASSWORD: restoio_dev
+      POSTGRES_DB: restoio
+    ports:
+      - "55432:5432"
+    volumes:
+      - restoio-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U restoio -d restoio"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://restoio:restoio_dev@postgres:5432/restoio?schema=public
+      API_PORT: 4000
+      WEB_ORIGIN: http://localhost:3000
+      SESSION_COOKIE_NAME: restoio_session
+      SESSION_TTL_HOURS: 12
+      QR_TOKEN_ENCRYPTION_KEY: restoio-local-qr-encryption-key-32
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@demo.local}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-ChangeMe_OnlyForLocalDev_123!}
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/api/v1}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  restoio-postgres:

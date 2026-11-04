@@ -2,7 +2,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { ApiClientError } from '../../../lib/api/client';
 import { secureRandomHex, secureRandomUUID } from '../../../lib/crypto/random';
 import { getAssistance, getCustomerMenu, requestAssistance, sendOrder, type AssistanceKind, type GuestAssistance } from '../customer.service';
 import type { CartLine, Menu, MenuItem } from '../types';
@@ -10,9 +9,9 @@ import { LanguageSelector } from './language-selector';
 
 const formatPrice = (value: number, currency: string, locale: string) => new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
 const dietaryLabelTranslations: Record<string, Record<string, string>> = {
-  'Contains meat': { am: 'ስጋ ይዟል', ar: 'يحتوي على اللحوم', zh: '含肉类', tr: 'Et içerir', es: 'Contiene carne', de: 'Enthält Fleisch' },
-  Vegan: { am: 'ቪጋን', ar: 'نباتي صرف', zh: '纯素', tr: 'Vegan', es: 'Vegano', de: 'Vegan' },
-  'Gluten free': { am: 'ግሉተን የለውም', ar: 'خالٍ من الغلوتين', zh: '无麸质', tr: 'Glutensiz', es: 'Sin gluten', de: 'Glutenfrei' },
+  'Contains meat': { am: 'ስጋ ይዟል', ar: 'يحتوي على اللحوم' },
+  Vegan: { am: 'ቪጋን', ar: 'نباتي صرف' },
+  'Gluten free': { am: 'ግሉተን የለውም', ar: 'خالٍ من الغلوتين' },
 };
 const localizeDietaryLabel = (label: string, locale: string) => dietaryLabelTranslations[label]?.[locale] ?? label;
 const cartKey = (token: string) => `restoio-cart:${token}`;
@@ -40,7 +39,7 @@ export function CustomerMenuPage({ token }: { token: string }) {
     setSelectedItem(null); setSelected({}); setInstructions(''); setMessage('');
   };
   const updateQuantity = (key: string, delta: number) => setCart((rows) => rows.flatMap((row) => row.key !== key ? [row] : row.quantity + delta <= 0 ? [] : [{ ...row, quantity: row.quantity + delta }]));
-  const submit = useCallback(async () => { setSubmitting(true); setMessage(''); try { const keyName = `restoio-checkout:${token}`; const guestName = `restoio-guest:${token}`; const idempotency = sessionStorage.getItem(keyName) ?? secureRandomUUID(); const guestToken = sessionStorage.getItem(guestName) ?? secureRandomHex(32); sessionStorage.setItem(keyName, idempotency); sessionStorage.setItem(guestName, guestToken); const result = await sendOrder(token, idempotency, guestToken, { note: note.trim() || undefined, items: cart.map((line) => ({ itemId: line.item.id, quantity: line.quantity, modifiers: Object.entries(line.selected).map(([groupId, optionIds]) => ({ groupId, optionIds })), instructions: line.instructions || undefined })) }); sessionStorage.removeItem(cartKey(token)); sessionStorage.removeItem(keyName); sessionStorage.removeItem(guestName); setCart([]); router.push(`/orders/${result.reference}`); } catch (e) { setMessage(e instanceof ApiClientError ? e.message : t('orderError')); } finally { setSubmitting(false); } }, [cart, note, router, t, token]);
+  const submit = useCallback(async () => { setSubmitting(true); setMessage(''); try { const keyName = `restoio-checkout:${token}`; const guestName = `restoio-guest:${token}`; const idempotency = sessionStorage.getItem(keyName) ?? secureRandomUUID(); const guestToken = sessionStorage.getItem(guestName) ?? secureRandomHex(32); sessionStorage.setItem(keyName, idempotency); sessionStorage.setItem(guestName, guestToken); const result = await sendOrder(token, idempotency, guestToken, { note: note.trim() || undefined, items: cart.map((line) => ({ itemId: line.item.id, quantity: line.quantity, modifiers: Object.entries(line.selected).map(([groupId, optionIds]) => ({ groupId, optionIds })), instructions: line.instructions || undefined })) }); sessionStorage.removeItem(cartKey(token)); sessionStorage.removeItem(keyName); sessionStorage.removeItem(guestName); setCart([]); router.push(`/orders/${result.reference}`); } catch { setMessage(t('orderError')); } finally { setSubmitting(false); } }, [cart, note, router, t, token]);
   const assist = async (kind: AssistanceKind) => { try { const result = await requestAssistance(token, kind); setTrackedAssistance((current) => [{ reference: result.reference, kind, status: result.status }, ...current.filter((entry) => entry.reference !== result.reference)].slice(0, 12)); setMessage(t('requestSent')); } catch { setMessage(t('orderError')); } };
   if (error) return <main className="customer-state"><div className="customer-state-icon">⌁</div><p className="customer-eyebrow">RestoIO</p><h1 className="display-type">{t('unavailable')}</h1><p>{t('unavailableCopy')}</p></main>;
   if (!menu) return <main className="customer-state"><div className="customer-loader"/><p>{t('loading')}</p></main>;
